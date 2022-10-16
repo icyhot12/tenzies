@@ -1,36 +1,62 @@
 import React from "react";
 import Square from "./Square";
+import { nanoid } from "nanoid"
 
 
 function App() {
-  const [squareElements, setSquareElements] = React.useState([])
+  const [squareElements, setSquareElements] = React.useState(newDice())
 
-  for (let i = 0; i < 10; i++) {
-    setSquareElements(prevSquares => {
-      prevSquares[i] =
-        <Square
-          key={Math.random()}
-          index={i}
-          number={Math.ceil(Math.random() * 9)}
-          clicked={true}
-        />
-    })
 
+  function generate() {
+    return {
+      number: Math.ceil(Math.random() * 9),
+      isHeld: false,
+      id: nanoid()
+    }
   }
 
-  function rollSquares() {
+  function newDice() {
+    const tempArray = []
 
+    for (let i = 0; i < 10; i++) {
+      tempArray.push(generate())
+    }
+    return tempArray
+  }
+
+  const squares = squareElements.map(element => (
+    <Square
+      key={element.id}
+      id={element.id}
+      number={element.number}
+      isHeld={element.isHeld}
+      handleClick={handleClick}
+    />
+  ))
+
+  function handleClick(id) {
+    setSquareElements(prevSquareElements => prevSquareElements.map(element => {
+      return element.id === id ?
+      {...element, isHeld: !element.isHeld} :
+      element
+    }))
+  }
+
+  function roll() {
+    setSquareElements(prevSquareElements => prevSquareElements.map(element => {
+      return element.isHeld ?
+      element :
+      generate()
+    }))
   }
 
   return (
     <main className="main-container">
       <div className="title">Tenzies Game</div>
       <div className="square-container">
-        {squareElements.map(square => {
-          return square
-        })}
+        {squares}
       </div>
-      <button className="roll-btn" onClick={rollSquares}>Roll</button>
+      <button className="roll-btn" onClick={roll}>Roll</button>
     </main>
   );
 }
